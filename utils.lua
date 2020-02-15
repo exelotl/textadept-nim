@@ -18,7 +18,7 @@ function _M.check_type(t, ...)
 end
 
 function _M.check_executable(exe)
-  return (nil ~= io.popen(exe.. " -v"):read('*all'))
+  return (nil ~= os.spawn(exe.. " -v"):read('*all'))
 end
 
 function _M.file_exists(filename)

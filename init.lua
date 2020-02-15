@@ -93,6 +93,49 @@ local function remove_type_info(text, position)
   end
 end
 
+local proc_like_keywords = {
+  proc = true,
+  func = true,
+  converter = true,
+  template = true,
+  macro = true,
+  iterator = true,
+}
+
+local function simplify_proc_type(type)
+  local keyword = type:match("^(%a+)")
+  if not proc_like_keywords[keyword] then
+    return type
+  end
+  
+  local head, params, tail = type:match("^(.+)%((.*)%)(.*)$")
+  
+  -- Split parameters into a list
+  local param_list = {}
+  for arg_name, arg_type in type:gmatch("([%w`_]): (%w`_)") do
+    table.insert(param_list, arg_name, arg_type)
+  end
+  
+  -- Fold parameters that share a type, hide name mangling
+  local new_params = ""
+  for i=1, #param_list, 2 do
+    local arg_name = param_list[i]
+    local arg_type = param_list[i+1]
+    local next_type = param_list[i+3]
+    arg_name = arg_name:gsub("`gensym%d+$", "")
+    if arg_type == next_type then
+      new_params = new_params..arg_name..", "
+    else
+      new_params = new_params..arg_name..": "..arg_type..", "
+    end
+  end
+  
+  -- Remove pragmas
+  local new_tail = tail:match("^(.*){%..+%.}$") or tail
+  
+  return head.."("..new_params..")"..new_tail
+end
+
 local function nim_complete(name)
   -- Returns a list of suggestions for autocompletion
   buffer.auto_c_separator = 35
@@ -114,7 +157,7 @@ local function nim_complete(name)
   local suggestions = {}
   local token_list = nimsuggest.suggest(buffer.current_pos-shift)
   for i, v in pairs(token_list) do
-    table.insert(suggestions, v.name..": "..v.type.."?"..(icons[v.skind] or ""))
+    table.insert(suggestions, v.name..": "..simplify_proc_type(v.type).."?"..(icons[v.skind] or ""))
   end
   if #suggestions == 0 then
     return textadept.editing.autocompleters.word(name)

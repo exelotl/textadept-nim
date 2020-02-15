@@ -15,6 +15,7 @@ local _M =
   ["skConst"] =         _SCINTILLA.next_image_type(),
   ["skResult"] =        _SCINTILLA.next_image_type(),
   ["skProc"] =          _SCINTILLA.next_image_type(),
+  ["skFunc"] =          _SCINTILLA.next_image_type(),
   ["skMethod"] =        _SCINTILLA.next_image_type(),
   ["skIterator"] =      _SCINTILLA.next_image_type(),
   ["skConverter"] =     _SCINTILLA.next_image_type(),

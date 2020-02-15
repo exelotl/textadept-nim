@@ -114,7 +114,7 @@ local function nim_complete(name)
   local suggestions = {}
   local token_list = nimsuggest.suggest(buffer.current_pos-shift)
   for i, v in pairs(token_list) do
-    table.insert(suggestions, v.name..": "..v.type.."?"..icons[v.skind])
+    table.insert(suggestions, v.name..": "..v.type.."?"..(icons[v.skind] or ""))
   end
   if #suggestions == 0 then
     return textadept.editing.autocompleters.word(name)
